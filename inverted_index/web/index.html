@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inverted Index</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+
+        body {
+            background-color: #adb5bd;
+        }
+
+        .result {
+            background-color: white;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: rgba(0,0,0,0.5) 0px 3px 2px 0px;
+            color:#4c4c4c
+        }
+
+        .search-input {
+            border-radius: 20px;
+            box-shadow: 0px 6px 10px 0px rgba(0, 0, 0, 0.3)
+        }
+
+        #search-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 40px;
+            background-color: #2d2926;
+            color: white;
+            position: absolute;
+            right: -15px;
+            bottom: -10px;
+            box-shadow: 0px 6px 10px 0px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+        }
+    </style>
+</head>
+
+<body>
+    <br>
+    <br>
+    <div id="app" class="container mt-2">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="input-group" style="position: relative;">
+                    <input v-model="phrase" type="text" class="form-control search-input" placeholder="Keywords">
+                    <button v-on:click="operateInput" class="btn" type="button" id="search-button">
+                        <img src="assets/find.svg" alt="search icon" style="width: 100%;  transform: rotate(270deg);">
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3" v-cloak>
+            <div class="col-md-5 p-3">
+                <div class="result">
+                    <h5 class="text-center">Inverted Index</h1>
+                    <p style="font-size: 14px;">result: {{result.length}}</p>
+                    <ul v-if="!loading" class="list-group">
+                        <li v-for="(item, index) in result" class="list-group-item d-flex justify-content-between">
+                            <span>
+                                {{item.docId}} - {{item.value}}
+                            </span>
+                            <div>
+                                <!-- <button v-on:click="getDataOfText(item.docId)" type="button"
+                                    class="btn btn-primary">modal</button> -->
+                                <button v-on:click="getJsonOfText(item.docId)" type="button"
+                                    class="btn btn-secondary">
+                                    <img src="assets/view.svg" alt="search icon" style="width: 20px;">
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
+                    <div v-if="loading" class="col-12 text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5 offset-md-1 p-3">
+                <div class="result">
+                    <h5 class="text-center">TF - IDF</h1>
+                    <p style="font-size: 14px;">result: {{resultTfIdf.length}}</p>
+                    <ul v-if="!loadingTfIdf" class="list-group">
+                        <li v-for="(item, index) in resultTfIdf" class="list-group-item d-flex justify-content-between">
+                            <span>
+                                {{item.docId}} - {{item.value}}
+                            </span>
+                            <div>
+                                <!-- <button v-on:click="getDataOfText(item.docId)" type="button"
+                                    class="btn btn-primary">modal</button> -->
+                                <button v-on:click="getJsonOfText(item.docId)" type="button"
+                                    class="btn btn-secondary"><img src="assets/view.svg" alt="search icon" style="width: 20px;"></button>
+                            </div>
+                        </li>
+                    </ul>
+                    <div v-if="loadingTfIdf" class="col-12 text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        <div id="content-modal" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog"
+            aria-labelledby="mySmallModalLabel" aria-hidden="true" v-cloak>
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    {{content}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <script src="./app.js"></script>
+
+</body>
+
+</html>
