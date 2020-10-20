@@ -104,7 +104,7 @@ class TfIdf:
         for key in self.index:
             current_docs_index = self.index[key]
             len_documents_contain_term = len(current_docs_index)
-            idf = math.log( len_documents / len_documents_contain_term ,2)
+            idf = math.log( len_documents / len_documents_contain_term)
             for i,item in enumerate(current_docs_index):
                 tf = item["value"]
                 tf_idf = tf * idf
